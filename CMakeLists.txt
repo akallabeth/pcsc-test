@@ -5,8 +5,12 @@ project(pcsc-test LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(PCSC REQUIRED libpcsclite)
+if (WIN32)
+	set(PCSC_LIBRARIES "Winscard")
+else()
+	find_package(PkgConfig REQUIRED)
+	pkg_check_modules(PCSC REQUIRED libpcsclite)
+endif()
 
 add_executable(${PROJECT_NAME} main.cpp)
 
