@@ -101,10 +101,11 @@
 #define SCARD_ATTR_SUPRESS_T1_IFS_REQUEST                                      \
   SCARD_ATTR_VALUE(SCARD_CLASS_SYSTEM, 0x0007)
 
-#if defined(_WIN32)
+#ifndef SCARD_PROTOCOL_ANY
 #define SCARD_PROTOCOL_ANY (SCARD_PROTOCOL_T0 | SCARD_PROTOCOL_T1)
+#endif
 
-static const char *pcsc_stringify_error(const LONG val) {
+static const char *stringify_error(const LONG val) {
 #define CASE_STR(x)                                                            \
   case x:                                                                      \
     return #x;
@@ -174,7 +175,6 @@ static const char *pcsc_stringify_error(const LONG val) {
     return "foobar";
   }
 }
-#endif
 
 static std::string string_to_hex(const std::string& input)
 {
@@ -194,7 +194,7 @@ static std::string string_to_hex(const std::string& input)
 
 static std::string err2str(LONG val) {
   std::stringstream ss;
-  ss << pcsc_stringify_error(val) << "[0x" << std::hex << std::setfill('0')
+  ss << stringify_error(val) << "[0x" << std::hex << std::setfill('0')
      << std::setw(8) << val << "]";
   return ss.str();
 }
