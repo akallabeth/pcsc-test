@@ -407,7 +407,7 @@ public:
         }
       }
 
-      return true;
+      return test(readers);
     }
 
 private:
