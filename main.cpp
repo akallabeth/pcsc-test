@@ -1,6 +1,8 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <vector>
+#include <string>
 #include <sstream>
 #include <string.h>
 #include <winscard.h>
@@ -339,6 +341,26 @@ public:
         return rc == SCARD_S_SUCCESS;
     }
 
+    bool test(const std::vector<std::string> & readers) const {
+        std::vector<SCARD_READERSTATE> states;
+        states.resize(readers.size());
+
+        for (size_t x=0; x<readers.size(); x++) {
+            const auto& name = readers[x];
+            auto& state = states[x];
+            state.szReader = name.c_str();
+        }
+
+        for (int x=0; x<10; x++) {
+            auto rc = SCardGetStatusChange(_context, 100, states.data(), states.size());
+            std::cout << "SCardGetStatusChange: (autoalloc " << _autoalloc << ") "
+                      << err2str(rc) << std::endl;
+            if (rc != SCARD_S_SUCCESS)
+                return false;
+        }
+        return true;
+    }
+
     bool for_each() {
       DWORD count = 0;
       std::string list;
@@ -370,6 +392,7 @@ public:
           throw rc2;
       }
 
+      std::vector<std::string> readers;
       size_t pos = 0;
       while (pos < count) {
         const char *str = &list.c_str()[pos];
@@ -378,10 +401,12 @@ public:
         if (len > 0) {
           std::cout << "reader: (autoalloc " << _autoalloc << ") " << str
                     << std::endl;
+            readers.push_back(str);
           cardhandle card(_context, str, _autoalloc);
           card.list();
         }
       }
+
       return true;
     }
 
